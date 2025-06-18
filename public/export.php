@@ -1,88 +1,126 @@
 <?php
-require_once '../includes/auth_check.php';
-require_once '../config/database.php';
-require_once '../includes/functions.php';
-require_once '../lib/dompdf/autoload.inc.php';
+require '../lib/dompdf/vendor/autoload.php';
+require '../config/database.php';
 
 use Dompdf\Dompdf;
+use Dompdf\Options;
 
-// Ambil parameter filter dari URL
+$status = $_GET['status'] ?? '';
 $bulan = $_GET['bulan'] ?? '';
 $tahun = $_GET['tahun'] ?? '';
-$status = $_GET['status'] ?? '';
 
-// Siapkan query
+$where = [];
 $params = [];
-$sql = "SELECT * FROM permohonan WHERE 1=1";
 
-// Filter status, abaikan jika status = "Semua"
-if (!empty($status) && $status !== 'Semua') {
-    $sql .= " AND LOWER(status) = LOWER(?)";
+if ($status && $status !== 'Semua') {
+    $where[] = 'status = ?';
     $params[] = $status;
 }
 
-if (!empty($bulan) && $bulan !== 'Semua') {
-    $sql .= " AND MONTH(tanggal) = ?";
+if ($bulan) {
+    $where[] = 'MONTH(tanggal) = ?';
     $params[] = $bulan;
 }
 
-if (!empty($tahun) && $tahun !== 'Semua') {
-    $sql .= " AND YEAR(tanggal) = ?";
+if ($tahun) {
+    $where[] = 'YEAR(tanggal) = ?';
     $params[] = $tahun;
 }
 
-$sql .= " ORDER BY tanggal DESC";
+$sql = 'SELECT * FROM permohonan';
+if ($where) {
+    $sql .= ' WHERE ' . implode(' AND ', $where);
+}
+$sql .= ' ORDER BY tanggal DESC';
+
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $data = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-// Siapkan kop surat
-$kopPath = '../assets/img/kopsurat.png';
-$kopImg = '';
-if (file_exists($kopPath)) {
-    $kopBase64 = base64_encode(file_get_contents($kopPath));
-    $kopImg = '<img src="data:image/png;base64,' . $kopBase64 . '" style="width:100%; margin-bottom:20px;">';
-}
+$options = new Options();
+$options->set('isRemoteEnabled', true);
+$dompdf = new Dompdf($options);
+$dompdf->setPaper('A4', 'landscape');
 
-// Mulai buat HTML untuk PDF
-$html = '<html><body>';
-$html .= $kopImg;
-$html .= '<h3 style="text-align:center; margin-bottom: 20px;">LAPORAN PERMOHONAN INFORMASI PUBLIK</h3><br>';
+// Encode logo sebagai base64
+$logo_path = '../assets/img/kopsurat.jpg';
+$type = pathinfo($logo_path, PATHINFO_EXTENSION);
+$data_logo = file_get_contents($logo_path);
+$base64_logo = 'data:image/' . $type . ';base64,' . base64_encode($data_logo);
 
-if (count($data) === 0) {
-    $html .= '<p style="text-align:center;">Tidak ada data yang ditemukan berdasarkan filter.</p>';
-} else {
-    $html .= '<table border="1" cellspacing="0" cellpadding="6" width="100%">
+$bulanNama = [
+    '', 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+];
+$judulBulan = $bulan ? $bulanNama[(int)$bulan] : 'Semua Bulan';
+$judulTahun = $tahun ?: 'Semua Tahun';
+
+$html = "
+<style>
+    body { font-family: Arial, sans-serif; font-size: 12px; }
+    table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    th, td { border: 1px solid #000; padding: 6px; vertical-align: top; }
+    th { background-color: #f2f2f2; }
+    .kop { width: 100%; margin-bottom: 10px; }
+    .kop img { height: 80px; float: left; }
+    .judul-container {
+        text-align: center;
+        margin-left: 100px;
+    }
+</style>
+
+<div class='kop'>
+    <img src='{$base64_logo}' />
+    <div class='judul-container'>
+        <h3>LAPORAN PERMOHONAN INFORMASI PUBLIK</h3>
+        <h4>BULAN {$judulBulan} TAHUN {$judulTahun}</h4>
+    </div>
+</div>
+
+<table>
     <thead>
-        <tr style="background:#eee;">
+        <tr>
             <th>No</th>
+            <th>Nomor Pendaftaran</th>
             <th>Nama</th>
+            <th>Alamat</th>
             <th>Kontak</th>
-            <th>Tanggal</th>
+            <th>Rincian Informasi</th>
+            <th>Tujuan Penggunaan</th>
+            <th>Cara Memperoleh</th>
+            <th>Cara Salinan</th>
             <th>Status</th>
+            <th>Tanggal Permohonan</th>
         </tr>
     </thead>
-    <tbody>';
+    <tbody>";
 
-    foreach ($data as $i => $row) {
-        $html .= '<tr>
-            <td>' . ($i + 1) . '</td>
-            <td>' . htmlspecialchars($row['nama']) . '</td>
-            <td>' . htmlspecialchars($row['kontak']) . '</td>
-            <td>' . date('d/m/Y', strtotime($row['tanggal'])) . '</td>
-            <td>' . htmlspecialchars($row['status']) . '</td>
-        </tr>';
+if ($data) {
+    $no = 1;
+    foreach ($data as $row) {
+        $html .= "<tr>
+            <td>{$no}</td>
+            <td>{$row['no_pendaftaran']}</td>
+            <td>{$row['nama']}</td>
+            <td>{$row['alamat']}</td>
+            <td>{$row['kontak']}</td>
+            <td>{$row['rincian_informasi']}</td>
+            <td>{$row['tujuan_informasi']}</td>
+            <td>{$row['cara_memperoleh']}</td>
+            <td>{$row['cara_salinan']}</td>
+            <td>{$row['status']}</td>
+            <td>" . date('d/m/Y', strtotime($row['tanggal'])) . "</td>
+        </tr>";
+        $no++;
     }
-
-    $html .= '</tbody></table>';
+} else {
+    $html .= "<tr><td colspan='11' style='text-align:center;'>Data tidak tersedia</td></tr>";
 }
 
-$html .= '</body></html>';
+$html .= "</tbody></table>";
 
-// Render PDF dengan Dompdf
-$dompdf = new Dompdf();
 $dompdf->loadHtml($html);
-$dompdf->setPaper('A4', 'portrait');
 $dompdf->render();
-$dompdf->stream('laporan_ppid.pdf', ['Attachment' => false]);
+$dompdf->stream('laporan_permohonan.pdf', ['Attachment' => false]);
 exit;
+?>

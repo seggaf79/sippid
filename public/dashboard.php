@@ -158,7 +158,7 @@ $ditolak = $pdo->query("SELECT COUNT(*) FROM permohonan WHERE status = 'Ditolak'
   </div>
 
   <!-- Tahun -->
-  <div class="col">
+  <div class="col-md-3">
     <select name="tahun" class="form-select">
       <option value="">Semua Tahun</option>
       <?php
@@ -169,7 +169,13 @@ $ditolak = $pdo->query("SELECT COUNT(*) FROM permohonan WHERE status = 'Ditolak'
         }
       ?>
     </select>
-  </div>
+    </div>
+    <div class="col-md-3">
+  <a href="export_excel.php?status=<?= urlencode($status_filter) ?>&bulan=<?= urlencode($bulan) ?>&tahun=<?= urlencode($tahun) ?>" class="btn btn-outline-success w-100">
+    <i class="bi bi-file-earmark-excel"></i> Export Excel
+  </a>
+</div>
+
   </form>
 
   <div class="table-responsive mb-3">
@@ -200,6 +206,7 @@ $ditolak = $pdo->query("SELECT COUNT(*) FROM permohonan WHERE status = 'Ditolak'
             <a href="detail.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-secondary">Detail</a>
             <a href="edit.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-primary">Edit</a>
             <a href="hapus.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Hapus data ini?')">Hapus</a>
+            <a href="upload_hasil.php?id=<?= $row['id'] ?>" class="btn btn-sm btn-warning">Upload Hasil</a>
           </td>
         </tr>
         <?php endforeach; else: ?>

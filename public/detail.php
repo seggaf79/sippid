@@ -25,13 +25,15 @@ if (!$data) {
     <meta charset="UTF-8">
     <title>Detail Permohonan - PPID Bulungan</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon">
 <link rel="icon" href="/favicon.ico" type="image/x-icon">
-  </head>
+
+</head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="#">
+    <a class="navbar-brand d-flex align-items-center" href="dashboard.php#">
       <img src="../assets/img/logo_ppid.png" alt="Logo" height="40" class="me-2">APLIKASI MANAJEMEN PPID BULUNGAN
           </a>
     <div>
@@ -115,6 +117,17 @@ if (!$data) {
         <?php endif; ?>
       </td>
     </tr>
+    <?php if (!empty($data['file_hasil'])): ?>
+<tr>
+  <th>File Hasil</th>
+  <td>
+    <a href="../<?= htmlspecialchars($data['file_hasil']) ?>" target="_blank" class="btn btn-sm btn-success">
+      <i class="bi bi-download"></i> Download File Hasil
+    </a>
+  </td>
+</tr>
+<?php endif; ?>
+
   </table>
 
   <div class="text-end">
@@ -126,7 +139,7 @@ if (!$data) {
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 <footer class="text-center py-3 text-muted" style="background-color: #f8f9fa;">
-    © 2025 - PPID Bulungan by Seggaf
+    © 2025 - SIPPID Bulungan by Seggaf
 </footer>
 
 </body>

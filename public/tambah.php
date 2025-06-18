@@ -44,6 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $kuasa_path = "uploads/$tahun/$bulan/$kuasa_name"; // path relatif ke database
     }
 
+  
     // Simpan ke DB
     $stmt = $pdo->prepare("INSERT INTO permohonan (no_pendaftaran, nama, alamat, kontak, rincian_informasi, tujuan_informasi, cara_memperoleh, cara_salinan, file_ktp, file_surat_kuasa, status)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Belum Diproses')");
@@ -54,6 +55,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $success = "Permohonan berhasil ditambahkan!";
 }
+
 ?>
 
 <!doctype html>
@@ -68,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
   <div class="container-fluid">
-    <a class="navbar-brand d-flex align-items-center" href="#">
+    <a class="navbar-brand d-flex align-items-center" href="dashboard.php">
       <img src="../assets/img/logo_ppid.png" alt="Logo" height="40" class="me-2">APLIKASI MANAJEMEN PPID BULUNGAN
           </a>
     <div>
@@ -91,15 +93,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="mb-3"><label class="form-label">Tujuan Penggunaan</label><textarea name="tujuan" class="form-control" required></textarea></div>
         <div class="mb-3">
             <label class="form-label">Cara Memperoleh Informasi</label>
-            <select name="cara_memperoleh" class="form-select" required>
-                <option value="Melihat/Membaca/Mendengarkan/Mencatat">Melihat/Membaca/Mendengarkan/Mencatat</option>
+            <select name="cara_memperoleh" class="form-select" id="cara_memperoleh" required>
+                <option disabled selected value="">-- Pilih Cara --</option>
+                <option value="Melihat/membaca">Melihat / Membaca / Mendengarkan / Mencatat </option>
                 <option value="Mendapatkan Salinan">Mendapatkan Salinan</option>
             </select>
         </div>
         <div class="mb-3">
             <label class="form-label">Cara Mendapatkan Salinan</label>
-            <select name="cara_salinan" class="form-select" required>
-                <option value="Mengambil Langsung">Mengambil Langsung</option>
+            <select name="cara_salinan" class="form-select" id="cara_salinan" required>
+                <option disabled selected value="">-- Pilih Cara --</option>
+                <option value="Langsung">Mengambil Langsung</option>
                 <option value="Kurir">Kurir</option>
                 <option value="Pos">Pos</option>
                 <option value="Email">Email</option>
