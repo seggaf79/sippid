@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <label class="form-label">Status Permohonan</label>
                     <select name="status" class="form-select" required>
                         <option value="Belum Diproses" <?= $data['status'] === 'Belum Diproses' ? 'selected' : '' ?>>Belum Diproses</option>
-                        <option value="Sudah Diproses" <?= $data['status'] === 'Sudah Diproses' ? 'selected' : '' ?>>Sudah Diproses</option>
+                        <option value="Sedang Diproses" <?= $data['status'] === 'Sedang Diproses' ? 'selected' : '' ?>>Sedang Diproses</option>
                         <option value="Selesai" <?= $data['status'] === 'Selesai' ? 'selected' : '' ?>>Selesai</option>
                         <option value="Ditolak" <?= $data['status'] === 'Ditolak' ? 'selected' : '' ?>>Ditolak</option>
                     </select>
